@@ -1,69 +1,213 @@
-import logo from "./logo.svg";
-import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  VStack,
+  useDisclosure,
+  Button,
+  Text,
+  HStack,
+  Select,
+  Input,
+  Box
+} from "@chakra-ui/react";
+import SelectWalletModal from "./Modal";
+import { useWeb3React } from "@web3-react/core";
+import { CheckCircleIcon, WarningIcon } from "@chakra-ui/icons";
+import { Tooltip } from "@chakra-ui/react";
+import { networkParams } from "./networks";
+import { toHex, truncateAddress } from "./utils";
 
-function App() {
-  const [account, setAccount] = useState(null);
-  const handleClick = async () => {
-    console.log("entro a click");
-    window.ethereum
-      .request({ method: "eth_requestAccounts" })
-      .then((accounts) => {
-        setAccount(accounts);
-      });
-    window.ethereum.on("accountsChanged", function (accounts) {
-      console.log("cambio cuenta", accounts);
-    });
+export default function Home() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    library,
+    chainId,
+    account,
+    deactivate,
+    active
+  } = useWeb3React();
+  const [signature, setSignature] = useState("");
+  const [error, setError] = useState("");
+  const [network, setNetwork] = useState(undefined);
+  const [message, setMessage] = useState("");
+  const [signedMessage, setSignedMessage] = useState("");
+  const [verified, setVerified] = useState();
 
-    window.ethereum.on("chainChanged", function (chain) {
-      console.log("cambio cambio la cadena", chain);
-    });
+  const handleNetwork = (e) => {
+    const id = e.target.value;
+    setNetwork(Number(id));
   };
 
-  const makeTransfer = async () => {
-    // txHash is a hex string
-    // As with any RPC call, it may throw an error
-    window.ethereum
-      .request({
-        method: "eth_sendTransaction",
-        params: [{
-        /*   nonce: "0x00", // ignored by MetaMask */
-        /*   gasPrice: "0x09184e72a000", // customizable by user during MetaMask confirmation.
-          gas: "0x2710", // customizable by user during MetaMask confirmation. */
-          to: "0xB9456E9c4beA5ed9F2bc85D2Eb64e8FA26441f70", // Required except during contract publications.
-          from: account[0], // must match user's active address.
-            value: "0x38D7EA4C68000", // Only required to send ether to the recipient from the initiating external account. */
-      /*     chainId: "0x3", // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask. */
-        }],
-      })
-      .then((hash) => console.log("este es el hash de la transa", hash))
-      .catch((err) => console.log("hubo un error de la transa", err));
+  const handleInput = (e) => {
+    const msg = e.target.value;
+    setMessage(msg);
+  };
+
+  const switchNetwork = async () => {
+    try {
+      await library.provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: toHex(network) }]
+      });
+    } catch (switchError) {
+      if (switchError.code === 4902) {
+        try {
+          await library.provider.request({
+            method: "wallet_addEthereumChain",
+            params: [networkParams[toHex(network)]]
+          });
+        } catch (error) {
+          setError(error);
+        }
+      }
+    }
+  };
+
+  const signMessage = async () => {
+    if (!library) return;
+    try {
+      const signature = await library.provider.request({
+        method: "personal_sign",
+        params: [message, account]
+      });
+      setSignedMessage(message);
+      setSignature(signature);
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const verifyMessage = async () => {
+    if (!library) return;
+    try {
+      const verify = await library.provider.request({
+        method: "personal_ecRecover",
+        params: [signedMessage, signature]
+      });
+      setVerified(verify === account.toLowerCase());
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const refreshState = () => {
+    setNetwork("");
+    setMessage("");
+    setSignature("");
+    setVerified(undefined);
+  };
+
+  const disconnect = () => {
+    refreshState();
+    deactivate();
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        {account ? (
-          <p>account: {account}</p>
-        ) : (
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
+    <>
+      <Text position="absolute" top={0} right="15px">
+      </Text>
+      <VStack justifyContent="center" alignItems="center" h="100vh">
+        <HStack marginBottom="10px">
+
+        </HStack>
+        <HStack>
+          {!active ? (
+            <Button onClick={onOpen}>Connect Wallet</Button>
+          ) : (
+            <Button onClick={disconnect}>Disconnect</Button>
+          )}
+        </HStack>
+        <VStack justifyContent="center" alignItems="center" padding="10px 0">
+          <HStack>
+            <Text>{`Connection Status: `}</Text>
+            {active ? (
+              <CheckCircleIcon color="green" />
+            ) : (
+              <WarningIcon color="#cd5700" />
+            )}
+          </HStack>
+
+          <Tooltip label={account} placement="right">
+            <Text>{`Account: ${truncateAddress(account)}`}</Text>
+          </Tooltip>
+          <Text>{`Network ID: ${chainId ? chainId : "No Network"}`}</Text>
+        </VStack>
+        {active && (
+          <HStack justifyContent="flex-start" alignItems="flex-start">
+            <Box
+              maxW="sm"
+              borderWidth="1px"
+              borderRadius="lg"
+              overflow="hidden"
+              padding="10px"
+            >
+              <VStack>
+                <Button onClick={switchNetwork} isDisabled={!network}>
+                  Switch Network
+                </Button>
+                <Select placeholder="Select network" onChange={handleNetwork}>
+                  <option value="3">Ropsten</option>
+                  <option value="4">Rinkeby</option>
+                  <option value="42">Kovan</option>
+                  <option value="1666600000">Harmony</option>
+                  <option value="42220">Celo</option>
+                </Select>
+              </VStack>
+            </Box>
+            <Box
+              maxW="sm"
+              borderWidth="1px"
+              borderRadius="lg"
+              overflow="hidden"
+              padding="10px"
+            >
+              <VStack>
+                <Button onClick={signMessage} isDisabled={!message}>
+                  Sign Message
+                </Button>
+                <Input
+                  placeholder="Set Message"
+                  maxLength={20}
+                  onChange={handleInput}
+                  w="140px"
+                />
+                {signature ? (
+                  <Tooltip label={signature} placement="bottom">
+                    <Text>{`Signature: ${truncateAddress(signature)}`}</Text>
+                  </Tooltip>
+                ) : null}
+              </VStack>
+            </Box>
+            <Box
+              maxW="sm"
+              borderWidth="1px"
+              borderRadius="lg"
+              overflow="hidden"
+              padding="10px"
+            >
+              <VStack>
+                <Button onClick={verifyMessage} isDisabled={!signature}>
+                  Verify Message
+                </Button>
+                {verified !== undefined ? (
+                  verified === true ? (
+                    <VStack>
+                      <CheckCircleIcon color="green" />
+                      <Text>Signature Verified!</Text>
+                    </VStack>
+                  ) : (
+                    <VStack>
+                      <WarningIcon color="red" />
+                      <Text>Signature Denied!</Text>
+                    </VStack>
+                  )
+                ) : null}
+              </VStack>
+            </Box>
+          </HStack>
         )}
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-      <button onClick={handleClick}>click me</button>
-      <button onClick={makeTransfer}>hacer transaccion</button>
-    </div>
+        <Text>{error ? error.message : null}</Text>
+      </VStack>
+      <SelectWalletModal isOpen={isOpen} closeModal={onClose} />
+    </>
   );
 }
-
-export default App;

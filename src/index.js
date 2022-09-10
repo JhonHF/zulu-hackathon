@@ -1,35 +1,25 @@
-import React from "react";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
-import detectEthereumProvider from "@metamask/detect-provider";
 
+import { ChakraProvider } from "@chakra-ui/react";
+import { Web3ReactProvider } from "@web3-react/core";
+import { ethers } from "ethers";
+
+import App from "./App";
+
+const getLibrary = (provider) => {
+  const library = new ethers.providers.Web3Provider(provider);
+  library.pollingInterval = 8000; // frequency provider is polling
+  return library;
+};
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-const startApp = async () => {
-  const provider = await detectEthereumProvider();
-
-  if (provider) {
-    // From now on, this should always be true:
-    // provider === window.ethereum
-    root.render(
-      <React.StrictMode>
+root.render(
+  <StrictMode>
+    <ChakraProvider>
+      <Web3ReactProvider getLibrary={getLibrary}>
         <App />
-      </React.StrictMode>
-    );
-  } else {
-    root.render(
-      <React.StrictMode>
-        <h1>debes tener metamask</h1>
-      </React.StrictMode>
-    );
-  }
-};
-
-startApp();
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+      </Web3ReactProvider>
+    </ChakraProvider>
+  </StrictMode>
+);
