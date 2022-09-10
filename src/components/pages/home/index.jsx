@@ -1,8 +1,14 @@
 import React from "react";
 import { ProductCard } from "../../molecules/productCard";
 import { HomeContainer } from "./styles";
+import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
+  const navigate = useNavigate();
+
+  const handleConnectWallet = () => {
+    navigate("/payment_gateway");
+  };
   return (
     <HomeContainer>
       <ProductCard
@@ -15,7 +21,7 @@ export const Home = () => {
           Planta para interiores con matera blanca en combinacion barro y madera
         </p>
         <div className="payment_method">
-          <button>💵 Pagar con CriptoPay</button>
+          <button onClick={handleConnectWallet}>💵 Pagar con CriptoPay</button>
         </div>
       </div>
     </HomeContainer>

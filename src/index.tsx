@@ -28,7 +28,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <DAppProvider config={config}>
-      <Home/>
+      <App/>
     </DAppProvider>
   </React.StrictMode>
 );
