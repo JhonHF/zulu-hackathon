@@ -17,7 +17,7 @@ function PaymentGateway() {
   return (
     <>
       <Center bg="#2D3748" h="100px" color="Black" marginLeft={100} marginRight={100} marginBottom={100}>
-        <Text fontSize={30} color="yellow.300">Estas a punto de enviar 2 dolares</Text>
+        <Text fontSize={30} color="yellow.300">Estas a punto de enviar 1 MATIC</Text>
       </Center>
       <Center marginTop="0" >
         <Button fontSize={40} height={20} width={400} onClick={sendMoney}>Enviar</Button>

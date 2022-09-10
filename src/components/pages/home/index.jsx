@@ -7,7 +7,7 @@ export const Home = () => {
   const navigate = useNavigate();
 
   const handleConnectWallet = () => {
-    navigate("/payment_gateway");
+    navigate("/connect_to_wallet");
   };
   return (
     <HomeContainer>
