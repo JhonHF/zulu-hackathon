@@ -1,30 +1,28 @@
 import React from "react";
 import "./App.css";
-import { Button, ChakraProvider, useDisclosure } from "@chakra-ui/react";
+import { ChakraProvider, useDisclosure } from "@chakra-ui/react";
 import Layout from "./components/Layout";
 import ConnectButton from "./components/ConnectButton";
 import AccountModal from "./components/AccountModal";
-import { useSendTransaction, useSendTransaction as UseSendTransaction } from "@usedapp/core";
-import { utils } from "ethers";
+import PaymentGateway from "./pages/PaymentGateway";
+import ConnectToWallet from "./pages/ConnectToWallet";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { sendTransaction } = useSendTransaction()
-
-
-  const sendMoney = ()=>{
-    console.log("send money")
-    sendTransaction({ to: "0xB9456E9c4beA5ed9F2bc85D2Eb64e8FA26441f70", value: utils.parseUnits("0.00001","mwei") })
-  }
 
   return (
     <ChakraProvider>
       <Layout>
         <ConnectButton handleOpenModal={onOpen} />
         <AccountModal isOpen={isOpen} onClose={onClose} />
-        <Button onClick={sendMoney}/>
+        <Router>
+          <Routes>
+            <Route path="/payment_gateway" element={<PaymentGateway />}></Route>
+            <Route path="/connect_to_wallet" element={<ConnectToWallet/>}></Route>
+          </Routes>
+        </Router>
       </Layout>
-
     </ChakraProvider>
   );
 }

@@ -1,14 +1,10 @@
 import React from "react";
-import "./App.css";
-import { Button, ChakraProvider, useDisclosure } from "@chakra-ui/react";
-import Layout from "./../components/Layout";
-import ConnectButton from "./../components/ConnectButton";
-import AccountModal from "./../components/AccountModal";
 import { useSendTransaction } from "@usedapp/core";
 import { utils } from "ethers";
+import { Button, Text } from "@chakra-ui/react";
+import { Center,  } from "@chakra-ui/react";
 
 function PaymentGateway() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const { sendTransaction } = useSendTransaction();
 
   const sendMoney = () => {
@@ -19,13 +15,14 @@ function PaymentGateway() {
   };
 
   return (
-    <ChakraProvider>
-      <Layout>
-        <ConnectButton handleOpenModal={onOpen} />
-        <AccountModal isOpen={isOpen} onClose={onClose} />
-        <Button onClick={sendMoney} />
-      </Layout>
-    </ChakraProvider>
+    <>
+      <Center bg="#2D3748" h="100px" color="Black" marginLeft={100} marginRight={100} marginBottom={100}>
+        <Text fontSize={30} color="yellow.300">Estas a punto de enviar 2 dolares</Text>
+      </Center>
+      <Center marginTop="0" >
+        <Button fontSize={40} height={20} width={400} onClick={sendMoney}>Enviar</Button>
+      </Center>
+    </>
   );
 }
 

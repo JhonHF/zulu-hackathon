@@ -1,21 +1,25 @@
-import { Button, Box, Text } from "@chakra-ui/react";
-import { useEthers, useEtherBalance, Polygon, useTokenBalance } from "@usedapp/core";
+import { Button, Box, Text, Center } from "@chakra-ui/react";
+import {
+  useEthers,
+  useEtherBalance,
+  Polygon,
+  useTokenBalance,
+} from "@usedapp/core";
 import { formatEther, formatUnits } from "@ethersproject/units";
 import Identicon from "./Identicon";
 
-
 type Props = {
   handleOpenModal: any;
-}
+};
 
-export default function ConnectButton({handleOpenModal}: Props) {
-  const { switchNetwork,activateBrowserWallet, account } = useEthers();
+export default function ConnectButton({ handleOpenModal }: Props) {
+  const { activateBrowserWallet, account } = useEthers();
 
-  const etherBalance = useTokenBalance("0x2791bca1f2de4661ed88a30c99a7a9449aa84174",account)
-  
-  function handleConnectWallet() {
-    activateBrowserWallet();
-  }
+  const etherBalance = useTokenBalance(
+    "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+    account
+  );
+
 
   return account ? (
     <Box
@@ -27,7 +31,7 @@ export default function ConnectButton({handleOpenModal}: Props) {
     >
       <Box px="3">
         <Text color="white" fontSize="md">
-          {etherBalance && formatUnits(etherBalance,"mwei")} USDC 
+          {etherBalance && formatUnits(etherBalance, "mwei")} USDC
         </Text>
       </Box>
 
@@ -57,6 +61,6 @@ export default function ConnectButton({handleOpenModal}: Props) {
       </Button>
     </Box>
   ) : (
-    <Button onClick={handleConnectWallet}>Connect to a wallet</Button>
+  <div></div>
   );
 }
