@@ -6,8 +6,8 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Mainnet, DAppProvider, Config } from "@usedapp/core";
 import { getDefaultProvider, providers } from "ethers";
+import { Home } from "./components/pages/home";
 
-//const polygon_rpc_provider = new providers.JsonRpcProvider(Polygon.rpcUrl)
 const polygon_rpc_provider = new providers.JsonRpcProvider(
   "https://polygon-rpc.com"
 );
@@ -28,7 +28,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <DAppProvider config={config}>
-      <App />
+      <Home/>
     </DAppProvider>
   </React.StrictMode>
 );
